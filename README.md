@@ -11,3 +11,11 @@ This repository contains the code, methodology, and results for a Genome-Wide As
 
 **Methodology**
 1. Data Acquisition: Harvested the `3K RG morpho-agronomic` phenotype dataset and the `3K RG 1M GWAS SNP` genotype dataset ([bed](https://3kricegenome.s3.amazonaws.com/snpseek-dl/3k-pruned-v2.1/pruned_v2.1.bed), [bim](https://3kricegenome.s3.amazonaws.com/snpseek-dl/3k-pruned-v2.1/pruned_v2.1.bim), [fam](https://3kricegenome.s3.amazonaws.com/snpseek-dl/3k-pruned-v2.1/pruned_v2.1.fam) files) from the International Rice Research Institute (IRRI) SNP Seek Database.
+2. Quality Control (QC) via PLINK: Applied a strict filtering pipeline to remove noise and false positives:
+a. **SNP Missingness:** Removed SNPs missing in >10% of individuals using `--geno 0.1` command.
+b. **Indivudal Missingness:** Removed individuals missing >10% of their genotype calls using `--mind 0.1` command.
+c. **Minor Allele Frequency:** Removed rare variants with an allele frequency <1% (`--maf 0.01`)
+d. **Filtering using Hardy-Weinberg Equilibrium:** Removed SNPs that significantly deviated from HWE as they denoted genotypic errors, population substructure or selection affecting the overall quality of data. `--hwe 0.001` revealed a Wahlund Effect (Population Stratification) due to different rice subspecies mixed in the dataset. This effect arises when the sample consists of individuals from two or more distinct subpopulations like different rice varieties in the same dataset. These subpopulations have different allele frequencies for many SNPs which leads to high deviation which mainly arises due to mixed genetic background rather than genotypic errors.
+e. **Filtering by High Relatedness:** Identified and removed one individual from each pair of highly related individuals like parent-offspring, full siblings while still maintaining the threshold. Calculated pairwise Identity-By-Descent (IBD) to generate `.genome` file, removing highly related individuals `PI_HAT > 0.125`.
+3. Capturing Genetic Variation: Performed PCA on the remaining 3001 samples to capture the genetic variations. The resulting eigenvectors (PC1 to PC5) were extracted using Python to serve as covariates in the final Mixed Linear model.
+4. 
